@@ -1,0 +1,31 @@
+#       _                  ____                _ 
+#      / \  _   _ _ __ ___|  _ \ _ __ ___   __| |
+#     / _ \| | | | '__/ _ \ |_) | '__/ _ \ / _` |
+#    / ___ \ |_| | | |  __/  __/| | | (_) | (_| |
+#   /_/   \_\__,_|_|  \___|_|   |_|  \___/ \__,_|
+# 
+
+name: Tarkox
+author: AureProd
+main: fr.aureprod.tarkox.Plugin
+version: 0.0.1
+api-version: 1.16
+commands:
+  tarkox:
+    description: §6Ceci est la commande pour le plugin Tarkox pour les joueurs
+    usage: "Usage: /tarkox [join|leave]"
+    permission: tarkox.use
+    permission-message: §cVous ne pouvez pas utiliser cette commande
+  tarkox-admin:
+    description: §6Ceci est la commande pour le plugin Tarkox pour les admins
+    usage: "Usage: /tarkox-admin [kick|start|end|status]"
+    permission: tarkox.admin
+    permission-message: §cVous ne pouvez pas utiliser cette commande
+permissions:
+  tarkox.use:
+    default: true
+    description: §2Autorise utilisation de la commande §4/tarkox [join|leave]
+  tarkox.admin:
+    default: op
+    description: §2Autorise utilisation de la commande §4/tarkox-admin [kick|start|end|status]
+  

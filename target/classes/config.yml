@@ -1,0 +1,132 @@
+#       _                  ____                _ 
+#      / \  _   _ _ __ ___|  _ \ _ __ ___   __| |
+#     / _ \| | | | '__/ _ \ |_) | '__/ _ \ / _` |
+#    / ___ \ |_| | | |  __/  __/| | | (_) | (_| |
+#   /_/   \_\__,_|_|  \___|_|   |_|  \___/ \__,_|
+#                                                 
+
+# the name of the world forder in the server directory
+# world_name: <name_of_world_folder_in_server_files>
+world_name: "world"
+
+# position of the world spawn
+# world_spawn: [x, y, z]
+world_spawn: [110, 3, -21]
+
+# duration of the game in seconds
+# game_time: <time_of_game_in_seconds>
+game_time: 180
+
+# in_game_status: <status_of_the_game_where_is_running>
+in_game_status: "In game"
+# waiting_status: <status_of_the_game_where_is_in_lobby>
+waiting_status: "In lobby"
+
+# list of strings
+# <PLAYER> : name of the player who made the error
+strings:
+  game_does_not_exist: "§cThis game doesn't exist!"
+
+# list of lists of chests items
+# loots_lists:
+#   <list_name>:
+#     <item_id>: <item_count>
+#     <item_id>: <item_count>
+loots_lists:
+  list1:
+    GOLDEN_APPLE: 64
+    APPLE: 64
+  list2:
+    BEEF: 64
+  list3:
+    ACACIA_BOAT: 1
+    ACACIA_BUTTON: 64
+  list4:
+    BREAD: 64
+    ACACIA_LOG: 64
+    BELL: 1
+
+# configuration of the scoreboard display
+# fields remplaceable in the text
+# <TIME> : time left in the game
+# <PLAYERS> : number of players in the game
+# <ALIVE> : number of players alive in the game
+# <EXTRACTED> : number of players extracted in the game
+# <KILLS> : number of kills of the player
+# scoreboard:
+#   title: <title_of_the_scoreboard>
+#   lines:
+#     - <line_1>
+#     - <line_2>
+#     - <line_3>
+#     - <line_4>
+#     - <line_5>
+scoreboard:
+  title: "§6§lTarkox game"
+  lines:
+    - "§6----------------------------"
+    - "§6§lTime left: §e<TIME>"
+    - "§6§lPlayers: §e<PLAYERS>"
+    - "§6§lAlive: §e<ALIVE>"
+    - "§6§lExtracted: §e<EXTRACTED>"
+    - "§6§lKills: §e<KILLS>"
+
+# list of game instances information
+# games:
+#   <map_name>:
+#     name: <name_of_map>
+#     min_players_nb: <min_number_of_players>
+#     max_players_nb: <max_number_of_players>
+#     wait_area_spawn: [x, y, z]
+#     extraction_areas:
+#       <zone_name>:
+#         min: [x, y, z]
+#         max: [x, y, z]
+#         wait_time: <wait_time_before_exctraction_in_seconds>
+#       <zone_name>:
+#         min: [x, y, z]
+#         max: [x, y, z]
+#         wait_time: <wait_time_before_exctraction_in_seconds>
+#   chests:
+#     <chest_name>: [x, y, z]
+#     <chest_name>: [x, y, z]
+#     <chest_name>: [x, y, z]
+#   game_spawns:
+#     <spawn_name>: [x, y, z]
+#     <spawn_name>: [x, y, z]
+#     <spawn_name>: [x, y, z]
+games:
+  map1:
+    name: "map test"
+    min_players_nb: 1
+    max_players_nb: 5
+    wait_area_spawn: [120, 3, -23]
+    extraction_areas:
+      area1:
+        min: [113, 3, -5]
+        max: [110, 7, -3]
+        wait_time: 10
+      area2:
+        min: [131, 3, 2]
+        max: [134, 7, 5]
+        wait_time: 10
+    chests:
+      chest1: [132, 4, -2]
+      chest2: [127, 4, -6]
+      chest3: [127, 4, 2]
+      chest4: [123, 4, -2]
+      chest5: [119, 4, 0]
+      chest6: [118, 4, -7]
+      chest7: [116, 4, 3]
+      chest8: [113, 4, -1]
+    game_spawns:
+      spawn1: [130, 3, -8]
+      spawn2: [130, 3, -4]
+      spawn3: [127, 3, -2]
+      spawn4: [123, 3, -6]
+      spawn5: [123, 3, 1]
+      spawn6: [120, 3, 2]
+      spawn7: [117, 3, -3]
+      spawn8: [114, 3, -7]
+      spawn9: [113, 3, 2]
+  
