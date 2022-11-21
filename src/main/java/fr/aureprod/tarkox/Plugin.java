@@ -20,7 +20,7 @@ public class Plugin extends JavaPlugin {
   @Override
   public void onEnable()
   {
-    System.out.println("[tarkox] Tarkox plugin enabled");
+    System.out.println("[Tarkox] Tarkox plugin enabled");
 
     this.saveDefaultConfig();
 
@@ -40,6 +40,6 @@ public class Plugin extends JavaPlugin {
   @Override
   public void onDisable()
   {
-    System.out.println("[tarkox] Tarkox plugin disabled");
+    System.out.println("[Tarkox] Tarkox plugin disabled");
   }
 }

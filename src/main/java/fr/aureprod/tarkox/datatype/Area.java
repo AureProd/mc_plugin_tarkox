@@ -32,15 +32,15 @@ public class Area {
 
         Position locationMin = new Position(
             this.min.getWorld(),
+            Math.min(this.min.getX(), this.max.getX()),
             Math.min(this.min.getY(), this.max.getY()),
-            Math.min(this.min.getZ(), this.max.getZ()),
-            Math.min(this.min.getX(), this.max.getX())
+            Math.min(this.min.getZ(), this.max.getZ())
         );
         Position locationMax = new Position(
             this.min.getWorld(),
+            Math.max(this.min.getX(), this.max.getX()),
             Math.max(this.min.getY(), this.max.getY()),
-            Math.max(this.min.getZ(), this.max.getZ()),
-            Math.max(this.min.getX(), this.max.getX())
+            Math.max(this.min.getZ(), this.max.getZ())
         );
 
         if ((location.getX() < locationMin.getX()) || (location.getX() > locationMax.getX())) return false;

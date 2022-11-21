@@ -39,7 +39,7 @@ public class TarkoxListener implements Listener {
 
             tarkoxInstance.killedPlayer(player);
         } 
-        catch (TarkoxPlayerNotInInstanceException e) {}
+        catch (TarkoxPlayerNotInInstanceException | TarkoxInstanceNotStartedException e) {}
     }
 
     @EventHandler
