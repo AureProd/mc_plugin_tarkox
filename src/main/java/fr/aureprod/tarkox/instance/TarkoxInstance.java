@@ -12,12 +12,15 @@ import fr.aureprod.tarkox.datatype.SpawnPosition;
 import fr.aureprod.tarkox.exception.TarkoxInstanceAlreadyStartedException;
 import fr.aureprod.tarkox.exception.TarkoxInstanceEnoughPlayersForStartException;
 import fr.aureprod.tarkox.exception.TarkoxInstanceFullException;
+import fr.aureprod.tarkox.exception.TarkoxInstanceNotStartedException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerDeadException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerExtractedException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerKickedException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerQuitException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerAlreadyInInstanceException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class TarkoxInstance extends TarkoxInstancePlayerController {
     private int taskRunner;
@@ -70,7 +73,12 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
                                         extactPlayer(player);
                                     } catch (TarkoxPlayerNotInInstanceException e) {}
                                 } 
-                                else tarkoxInstancePlayer.incrementTimeInExctractionArea();
+                                else {
+                                    tarkoxInstancePlayer.incrementTimeInExctractionArea();
+
+                                    Integer timeLeft = tarkoxInstancePlayer.getExtractionArea().getWaitTime() - tarkoxInstancePlayer.getTimeInExctractionArea();
+                                    player.sendMessage("time before extraction : " + timeLeft + "s"); // TODO:
+                                }
                             }
                             else tarkoxInstancePlayer.resetExctractionInformations();
                         }
@@ -131,9 +139,9 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         this.addPlayerKick(player);
     }
 
-    public void startExtractPlayer(Player player) throws TarkoxPlayerNotInInstanceException {
-        if (!this.isInGamePlayer(player)) throw new RuntimeException("Player is not in instance");
-        if (!isInGame()) throw new RuntimeException("Instance is not in started game");
+    public void startExtractPlayer(Player player) throws TarkoxPlayerNotInInstanceException, TarkoxInstanceNotStartedException {
+        if (!this.isInGamePlayer(player)) throw new TarkoxPlayerNotInInstanceException(player);
+        if (!this.isInGame()) throw new TarkoxInstanceNotStartedException();
 
         TarkoxInstancePlayer tarkoxInstancePlayer = this.getTarkoxInstancePlayerByPlayer(player);
         if (tarkoxInstancePlayer.hasExtractionArea()) return;
@@ -142,6 +150,8 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
 
         tarkoxInstancePlayer.resetExctractionWaitTime();
         tarkoxInstancePlayer.setExtractionArea(extractionArea);
+
+        player.sendMessage("start extraction"); // TODO:
     }
 
     public void extactPlayer(Player player) throws TarkoxPlayerNotInInstanceException {
@@ -172,9 +182,11 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         }
 
         for (Player player : this.getInGamePlayers()) {
-            // get a random spawn point
             SpawnPosition spawn = this.getRandomSpawn();
             player.teleport(spawn.toLocation());
+
+            player.sendTitle("La game démarre", "Fouillez les coffres, survivez et extractez-vous", 10, 70, 20);
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Hello, world!"));
         }
     }
 
