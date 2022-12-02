@@ -5,46 +5,100 @@
 #   /_/   \_\__,_|_|  \___|_|   |_|  \___/ \__,_|
 #                                                 
 
-# the name of the world forder in the server directory
-# world_name: <name_of_world_folder_in_server_files>
-world_name: "world"
-
 # position of the world spawn
-# world_spawn: [x, y, z]
-world_spawn: [110, 3, -21]
+# world_spawn: [world_index, x, y, z]
+world_spawn: [0, 110, 3, -21]
 
-# duration of the game in seconds
-# game_time: <time_of_game_in_seconds>
-game_time: 180
-
+# Strings for game status
 # in_game_status: <status_of_the_game_where_is_running>
 in_game_status: "In game"
 # waiting_status: <status_of_the_game_where_is_in_lobby>
 waiting_status: "In lobby"
 
 # list of strings
-# <PLAYER> : name of the player who made the error
 strings:
-  game_does_not_exist: "§cThis game doesn't exist!"
+  # <MAP> : name of the map
+  map_has_started: "The map '<MAP>' has started"
+  # <MAP> : name of the map
+  map_has_stopped: "The map '<MAP>' has stopped"
+  # <MAP> : name of the map
+  status_map_name: "Map name: '<MAP>'"
+  # <PLAYERS> : number of players in the game
+  status_players_count: "Players: <PLAYERS>"
+  # <STATUS> : status of the game
+  status_map_status: "Status: <STATUS>"
+  you_start_your_extraction: "you start your extraction"
+  you_has_extracted: "you are extracted"
+  # <TIMER> : time before teleportation to the game
+  you_time_before_extraction: "You have to wait <TIMER>s before extracting"
+  # <TIMER> : time before teleportation to the game
+  you_join_game_wait_time_tp: "You will be teleported in <TIMER>s"
+  you_join_game_title_of_title: "Good game"
+  you_join_game_subtitle_of_title: "Search chests, survive and extract the stuff"
+  you_join_game_command: "You have joined the game"
+  you_leave_game_command: "You have left the game"
+  error_game_does_not_exist: "§cThis game doesn't exist"
+  error_game_already_exist: "§cThis game already exist"
+  error_game_is_full: "§cThis game is full"
+  error_game_already_started: "§cThis game is already started"
+  error_game_enough_players_to_start: "§cThere is not enough players to start the game"
+  error_command_sender_is_not_player: "§cYou must be a player to execute this command"
+  # <PLAYER> : name of the player who made the error
+  error_player_not_in_game: "§c<PLAYER> is not in a game"
+  error_you_are_not_in_game: "§cYou are not in a game"
+  # <PLAYER> : name of the player who made the error
+  error_player_has_quit_game: "§c<PLAYER> has quit the game"
+  error_you_have_quit_game: "§cYou have quit the game"
+  # <PLAYER> : name of the player who made the error
+  error_player_already_in_game: "§c<PLAYER> is already in a game"
+  error_you_are_already_in_game: "§cYou are already in a game"
+  # <PLAYER> : name of the player who made the error
+  error_player_has_extracted: "§c<PLAYER> has extracted"
+  error_you_have_extracted: "§cYou have extracted"
+  # <PLAYER> : name of the player who made the error
+  error_player_has_died: "§c<PLAYER> has died"
+  error_you_have_died: "§cYou have died"
 
 # list of lists of chests items
-# loots_lists:
-#   <list_name>:
-#     <item_id>: <item_count>
-#     <item_id>: <item_count>
-loots_lists:
-  list1:
-    GOLDEN_APPLE: 64
-    APPLE: 64
-  list2:
-    BEEF: 64
-  list3:
-    ACACIA_BOAT: 1
-    ACACIA_BUTTON: 64
-  list4:
-    BREAD: 64
-    ACACIA_LOG: 64
-    BELL: 1
+# for <item_id> check all materials in https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# loots:
+#   <type_name>
+#     <list_name>:
+#       <item_id>: <item_count>
+#       <item_id>: <item_count>
+#   <type_name>
+#     <list_name>:
+#       <item_id>: <item_count>
+#       <item_id>: <item_count>
+#   <type_name>
+#     <list_name>:
+#       <item_id>: <item_count>
+#       <item_id>: <item_count>
+loots:
+  medical:
+    list1:
+      GOLDEN_APPLE: 87
+  armor:
+    list1:
+      IRON_HELMET: 1
+      IRON_CHESTPLATE: 1
+      IRON_LEGGINGS: 1
+      IRON_BOOTS: 1
+  weapons:
+    list1:
+      IRON_SWORD: 1
+    list2:
+      IRON_PICKAXE: 1
+      IRON_AXE: 1
+      IRON_SHOVEL: 1
+  food:
+    list1:
+      BEEF: 64
+      APPLE: 32
+    list2:
+      BREAD: 64
+      COOKED_BEEF: 16
+      COOKED_CHICKEN: 16
 
 # configuration of the scoreboard display
 # fields remplaceable in the text
@@ -74,8 +128,10 @@ scoreboard:
 # list of game instances information
 # games:
 #   <map_name>:
+#     world_index: <index_of_the_world>
 #     name: <name_of_map>
-#     min_players_nb: <min_number_of_players>
+#     duration_time: <duraction_of_game_in_seconds>
+#     wait_time_before_tp: <wait_time_before_tp_in_seconds>
 #     max_players_nb: <max_number_of_players>
 #     wait_area_spawn: [x, y, z]
 #     extraction_areas:
@@ -88,19 +144,26 @@ scoreboard:
 #         max: [x, y, z]
 #         wait_time: <wait_time_before_exctraction_in_seconds>
 #   chests:
-#     <chest_name>: [x, y, z]
-#     <chest_name>: [x, y, z]
-#     <chest_name>: [x, y, z]
-#   game_spawns:
+#     <type_name>:
+#       <chest_name>: [x, y, z]
+#       <chest_name>: [x, y, z]
+#     <type_name>:
+#       <chest_name>: [x, y, z]
+#       <chest_name>: [x, y, z]
+#     <type_name>:
+#       <chest_name>: [x, y, z]
+#       <chest_name>: [x, y, z]
+#   spawns:
 #     <spawn_name>: [x, y, z]
 #     <spawn_name>: [x, y, z]
 #     <spawn_name>: [x, y, z]
 games:
   map1:
+    world_index: 0
     name: "map test"
-    min_players_nb: 1
+    duration_time: 180
+    wait_time_before_tp: 10
     max_players_nb: 5
-    wait_area_spawn: [120, 3, -23]
     extraction_areas:
       area1:
         min: [113, 3, -5]
@@ -111,15 +174,19 @@ games:
         max: [134, 7, 5]
         wait_time: 10
     chests:
-      chest1: [132, 4, -2]
-      chest2: [127, 4, -6]
-      chest3: [127, 4, 2]
-      chest4: [123, 4, -2]
-      chest5: [119, 4, 0]
-      chest6: [118, 4, -7]
-      chest7: [116, 4, 3]
-      chest8: [113, 4, -1]
-    game_spawns:
+      medical:
+        chest1: [132, 4, -2]
+        chest2: [127, 4, -6]
+      armor:
+        chest1: [127, 4, 2]
+        chest2: [123, 4, -2]
+      weapons:
+        chest1: [119, 4, 0]
+        chest2: [118, 4, -7]
+      food:
+        chest1: [116, 4, 3]
+        chest2: [113, 4, -1]
+    spawns:
       spawn1: [130, 3, -8]
       spawn2: [130, 3, -4]
       spawn3: [127, 3, -2]

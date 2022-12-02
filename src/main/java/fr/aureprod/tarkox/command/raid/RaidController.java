@@ -1,25 +1,25 @@
-package fr.aureprod.tarkox.command.tarkox;
+package fr.aureprod.tarkox.command.raid;
 
 import org.bukkit.command.CommandSender;
 
 import fr.aureprod.tarkox.Plugin;
 import fr.aureprod.tarkox.command.CommandController;
 
-public class TarkoxController extends CommandController {
+public class RaidController extends CommandController {
     private String joinSubCommand;
     private String leaveSubCommand;
 
     private String joinSubCommandTemplate;
     private String leaveSubCommandTemplate;
 
-    public TarkoxController(Plugin plugin) {
+    public RaidController(Plugin plugin) {
         super(plugin);
 
         this.joinSubCommand = "join";
         this.leaveSubCommand = "leave";
 
-        this.joinSubCommandTemplate = "§c/tarkox join <mapName>";
-        this.leaveSubCommandTemplate = "§c/tarkox leave";
+        this.joinSubCommandTemplate = "§c/raid join <mapName>";
+        this.leaveSubCommandTemplate = "§c/raid leave";
     }
 
     public String getJoinSubCommand() {
@@ -30,7 +30,7 @@ public class TarkoxController extends CommandController {
         return leaveSubCommand;
     }
 
-    public void sendTarkoxCommandTemplate(CommandSender sender) {
+    public void sendRaidCommandTemplate(CommandSender sender) {
         sender.sendMessage(this.joinSubCommandTemplate);
         sender.sendMessage(this.leaveSubCommandTemplate);
     }

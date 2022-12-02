@@ -18,31 +18,34 @@ public class TarkoxInstanceRunnable implements Runnable {
     @Override
     public void run() {
         if (instance.isInGame()) {
-            if (instance.getCurrentTime() >= instance.plugin.configController.getGameMaxTime()) instance.stopInstance();
+            if (instance.getCurrentTime() >= instance.getDurationTime()) instance.stopInstance();
             else {
                 instance.incrementCurrentTime();
 
                 List<TarkoxInstancePlayer> tarkoxInstancePlayers = new ArrayList<TarkoxInstancePlayer>(instance.getInGameTarkoxInstancePlayers()); 
 
                 for (TarkoxInstancePlayer tarkoxInstancePlayer : tarkoxInstancePlayers) {
-                    tarkoxInstancePlayer.applyOrUpdateScoreBoard();
-                    Player player = tarkoxInstancePlayer.getPlayer();
+                    if (tarkoxInstancePlayer.isInGame()) {
+                        tarkoxInstancePlayer.applyOrUpdateScoreBoard();
+                        Player player = tarkoxInstancePlayer.getPlayer();
 
-                    if (tarkoxInstancePlayer.hasExtractionArea() && tarkoxInstancePlayer.getExtractionArea().isInZone(player)) {
-                        if (tarkoxInstancePlayer.getExtractionArea().getWaitTime() <= tarkoxInstancePlayer.getTimeInExctractionArea()) {
-                            try {
-                                instance.extactPlayer(player);
+                        if (tarkoxInstancePlayer.hasExtractionArea() && tarkoxInstancePlayer.getExtractionArea().isInZone(player)) {
+                            if (tarkoxInstancePlayer.getExtractionArea().getWaitTime() < tarkoxInstancePlayer.getTimeInExctractionArea()) {
+                                try {
+                                    instance.extactPlayer(player);
+                                } 
+                                catch (TarkoxPlayerNotInInstanceException | TarkoxInstanceNotStartedException e) {}
                             } 
-                            catch (TarkoxPlayerNotInInstanceException | TarkoxInstanceNotStartedException e) {}
-                        } 
-                        else {
-                            tarkoxInstancePlayer.incrementTimeInExctractionArea();
+                            else {
+                                tarkoxInstancePlayer.incrementTimeInExctractionArea();
 
-                            Integer timeLeft = tarkoxInstancePlayer.getExtractionArea().getWaitTime() - tarkoxInstancePlayer.getTimeInExctractionArea();
-                            player.sendMessage("time before extraction : " + (timeLeft + 1) + "s"); // TODO:
+                                Integer timeLeft = tarkoxInstancePlayer.getExtractionArea().getWaitTime() - tarkoxInstancePlayer.getTimeInExctractionArea();
+                                String string = this.instance.plugin.configController.getString("you_time_before_extraction", "TIMER", timeLeft);
+                                player.sendMessage(string);
+                            }
                         }
+                        else tarkoxInstancePlayer.resetExctractionInformations();
                     }
-                    else tarkoxInstancePlayer.resetExctractionInformations();
                 }                    
             }
         }

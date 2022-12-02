@@ -11,21 +11,21 @@ main: fr.aureprod.tarkox.Plugin
 version: 0.0.1
 api-version: 1.16
 commands:
-  tarkox:
-    description: §6Ceci est la commande pour le plugin Tarkox pour les joueurs
-    usage: "Usage: /tarkox [join|leave]"
+  raid:
+    description: §6This command is used by players to join or leave a raid.
+    usage: "Usage: /raid [join|leave]"
     permission: tarkox.use
-    permission-message: §cVous ne pouvez pas utiliser cette commande
+    permission-message: §cYou don't have the permission to use this command.
   tarkox-admin:
-    description: §6Ceci est la commande pour le plugin Tarkox pour les admins
-    usage: "Usage: /tarkox-admin [kick|start|end|status]"
+    description: §6This command is used by admins to manage the plugin for stop and see the status of the raid.
+    usage: "Usage: /tarkox-admin [end|status]"
     permission: tarkox.admin
-    permission-message: §cVous ne pouvez pas utiliser cette commande
+    permission-message: §cYou don't have the permission to use this command.
 permissions:
   tarkox.use:
     default: true
-    description: §2Autorise utilisation de la commande §4/tarkox [join|leave]
+    description: §2This permission is used to allow players to use the raid command §4/raid [join|leave]
   tarkox.admin:
     default: op
-    description: §2Autorise utilisation de la commande §4/tarkox-admin [kick|start|end|status]
+    description: §2This permission is used to allow players to use the admin command §4/tarkox-admin [end|status]
   

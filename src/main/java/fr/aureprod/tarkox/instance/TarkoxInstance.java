@@ -1,7 +1,9 @@
 package fr.aureprod.tarkox.instance;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -16,12 +18,9 @@ import fr.aureprod.tarkox.exception.TarkoxInstanceFullException;
 import fr.aureprod.tarkox.exception.TarkoxInstanceNotStartedException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerDeadException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerExtractedException;
-import fr.aureprod.tarkox.exception.TarkoxInstancePlayerKickedException;
 import fr.aureprod.tarkox.exception.TarkoxInstancePlayerQuitException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerAlreadyInInstanceException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 
 public class TarkoxInstance extends TarkoxInstancePlayerController {
     private int taskRunnerId;
@@ -29,14 +28,14 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
     public TarkoxInstance(
         Plugin plugin, 
         String name, 
-        Integer minPlayers, 
+        Integer durationTime,
+        Integer waitTimeBeforeTp,
         Integer maxPlayers,
-        SpawnPosition waitAreaSpawn, 
         List<ExtractionArea> extractionAreas, 
-        List<Chest> chests,
+        HashMap<String, List<Chest>> chests,
         List<SpawnPosition> spawns
     ) {
-        super(plugin, name, minPlayers, maxPlayers, waitAreaSpawn, extractionAreas, chests, spawns);
+        super(plugin, name, durationTime, waitTimeBeforeTp, maxPlayers, extractionAreas, chests, spawns);
     }
 
     public int getTaskRunnerId() {
@@ -47,16 +46,12 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         this.setStatusInGame();
         this.resetCurrentTime();
 
-        this.taskRunnerId = this.runGameRunner();
+        this.taskRunnerId = this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin, new TarkoxInstanceRunnable(this), 0L, 20L);
     }
 
     private void stopTimer() {
         this.setStatusWaiting();
         this.resetCurrentTime();
-    }
-
-    private int runGameRunner() {
-        return this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin, new TarkoxInstanceRunnable(this), 0L, 20L);
     }
 
     private void removePlayer(Player player, Boolean needClearInventory, Boolean needSpawnTeleportation) throws TarkoxPlayerNotInInstanceException {
@@ -68,7 +63,7 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         
         this.removeInGamePlayer(tarkoxInstancePlayer);
 
-        if (this.getInGamePlayersCount() < this.getMinPlayers()) this.stopInstance();
+        if (this.getInGamePlayersCount() < 1) this.stopInstance();
         
         if (needClearInventory) {
             player.getInventory().clear();
@@ -78,34 +73,30 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         if (needSpawnTeleportation) player.teleport(this.plugin.configController.getWorldSpawn().toLocation());
     }
     
-    public void joinPlayer(Player player) throws TarkoxInstancePlayerQuitException, TarkoxPlayerAlreadyInInstanceException, TarkoxInstanceFullException, TarkoxInstancePlayerExtractedException, TarkoxInstancePlayerKickedException, TarkoxInstancePlayerDeadException, TarkoxInstanceAlreadyStartedException, TarkoxInstanceEnoughPlayersForStartException {
+    public void joinPlayer(Player player) throws TarkoxInstancePlayerQuitException, TarkoxPlayerAlreadyInInstanceException, TarkoxInstanceFullException, TarkoxInstancePlayerExtractedException, TarkoxInstancePlayerDeadException, TarkoxInstanceAlreadyStartedException, TarkoxInstanceEnoughPlayersForStartException {
         if (this.plugin.instanceController.isPlayerInInstance(player)) throw new TarkoxPlayerAlreadyInInstanceException(player);
         if (this.getInGamePlayersCount() >= this.getMaxPlayers()) throw new TarkoxInstanceFullException();
         if (this.isInGamePlayer(player)) throw new TarkoxPlayerAlreadyInInstanceException(player);
         if (this.isPlayerQuit(player)) throw new TarkoxInstancePlayerQuitException(player);
-        if (this.isPlayerKick(player)) throw new TarkoxInstancePlayerKickedException(player);
         if (this.isPlayerExtracted(player)) throw new TarkoxInstancePlayerExtractedException(player);
         if (this.isPlayerDead(player)) throw new TarkoxInstancePlayerDeadException(player);
-        
+
         TarkoxInstancePlayer tarkoxInstancePlayer = new TarkoxInstancePlayer(this.plugin, this, player);
 
         this.addInGamePlayer(tarkoxInstancePlayer);
 
-        player.teleport(this.getWaitAreaSpawn().toLocation());
+        if (this.isWaiting()) this.startInstance();
 
-        if (this.getInGamePlayersCount() >= this.getMinPlayers()) this.startInstance();
+        // timer of 10 seconds before add player in game
+        int taskRunnerId = this.plugin.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin, new TarkoxInstanceRunnableBeforePlayerTp(this, tarkoxInstancePlayer), 0L, 20L);
+    
+        tarkoxInstancePlayer.setWaitBeforeTpTaskRunnerId(taskRunnerId);
     }
 
     public void leavePlayer(Player player) throws TarkoxPlayerNotInInstanceException {
         this.removePlayer(player, true, true);
 
         if (this.isInGame()) this.addPlayerQuit(player);
-    }
-
-    public void kickPlayer(Player player) throws TarkoxPlayerNotInInstanceException {
-        this.removePlayer(player, true, true);
-
-        this.addPlayerKick(player);
     }
 
     public void startExtractPlayer(Player player) throws TarkoxPlayerNotInInstanceException, TarkoxInstanceNotStartedException {
@@ -120,13 +111,21 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
         tarkoxInstancePlayer.resetExctractionWaitTime();
         tarkoxInstancePlayer.setExtractionArea(extractionArea);
 
-        player.sendMessage("start extraction"); // TODO:
+        String string = this.plugin.configController.getString("you_start_your_extraction");
+        player.sendMessage(string);
     }
 
     public void extactPlayer(Player player) throws TarkoxPlayerNotInInstanceException, TarkoxInstanceNotStartedException {
         if (!this.isInGame()) throw new TarkoxInstanceNotStartedException();
         
         this.removePlayer(player, false, true);
+
+        String string = this.plugin.configController.getString("you_has_extracted");
+        player.sendMessage(string);
+
+        // reset player life and food
+        player.setHealth(20);
+        player.setFoodLevel(20);
 
         this.addPlayerExtracted(player);
     }
@@ -140,28 +139,26 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
     }
 
     public void startInstance() throws TarkoxInstanceAlreadyStartedException, TarkoxInstanceEnoughPlayersForStartException {
-        if (this.getInGamePlayersCount() < this.getMinPlayers()) throw new TarkoxInstanceEnoughPlayersForStartException();
+        if (this.getInGamePlayersCount() < 1) throw new TarkoxInstanceEnoughPlayersForStartException();
         if (this.isInGame()) throw new TarkoxInstanceAlreadyStartedException();
         
         System.out.println("[Tarkox] Instance " + this.getName() + " started");
 
         this.startTimer();
 
-        for (Chest chest : this.chests) {
-            chest.getInventory().clear();
+        // foreach hasmap
+        for (Entry<String, List<Chest>> entry : this.chests.entrySet()) {
+            String lootsType = entry.getKey();
+            List<Chest> chestsList = entry.getValue();
 
-            List<ItemStack> items = this.plugin.configController.getRandomLootsList();
-            for (ItemStack item : items) {
-                chest.getInventory().addItem(item);
+            for (Chest chest : chestsList) {
+                chest.getInventory().clear();
+    
+                List<ItemStack> items = this.plugin.configController.getRandomLoots(lootsType);
+                for (ItemStack item : items) {
+                    chest.getInventory().addItem(item);
+                }
             }
-        }
-
-        for (Player player : this.getInGamePlayers()) {
-            SpawnPosition spawn = this.getRandomSpawn();
-            player.teleport(spawn.toLocation());
-
-            player.sendTitle("La game démarre", "Fouillez les coffres, survivez et extractez-vous", 10, 70, 20);
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Hello, world!"));
         }
     }
 
@@ -179,7 +176,6 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
 
         this.clearPlayersInGame();
         this.clearPlayersQuit();
-        this.clearPlayersKicks();
         this.clearPlayersExtracted();
         this.clearPlayersDead();
 
