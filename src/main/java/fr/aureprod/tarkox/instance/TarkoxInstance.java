@@ -174,11 +174,17 @@ public class TarkoxInstance extends TarkoxInstancePlayerController {
             catch (TarkoxPlayerNotInInstanceException e) {}
         }
 
-        this.clearPlayersInGame();
-        this.clearPlayersQuit();
-        this.clearPlayersExtracted();
-        this.clearPlayersDead();
+        // wait 5 seconds before remove instance
+        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
+            @Override
+            public void run() {
+                clearPlayersInGame();
+                clearPlayersQuit();
+                clearPlayersExtracted();
+                clearPlayersDead();
 
-        System.out.println("[Tarkox] Instance " + this.getName() + " stopped");
+                System.out.println("[Tarkox] Instance " + getName() + " stopped");
+            }
+        }, 100L);
     }   
 }
