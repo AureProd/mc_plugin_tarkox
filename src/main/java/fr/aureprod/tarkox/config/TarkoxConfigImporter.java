@@ -20,22 +20,21 @@ import fr.aureprod.tarkox.instance.TarkoxInstance;
 public class TarkoxConfigImporter {
     private Plugin plugin;
 
-    private String pathWorldName;
     private String pathWorldSpawn;
-    private String pathGameMaxTime;
-    private String pathCustomStrings;
-    private String pathLootsLists;
     private String pathInGameStatus;
     private String pathWaitingStatus;
+    private String pathStrings;
+    private String pathLoots;
 
     private String pathScoreBoardTitle;
     private String pathScoreBoardLines;
 
     private String pathTarkoxInstances;
+    private String pathTarkoxInstancesWorldIndex;
     private String pathTarkoxInstancesName;
-    private String pathTarkoxInstancesMinPlayers;
+    private String pathTarkoxInstancesDurationTime;
+    private String pathTarkoxInstancesWaitTimeBeforeTp;
     private String pathTarkoxInstancesMaxPlayers;
-    private String pathTarkoxInstancesWaitAreaSpawn;
     private String pathTarkoxInstancesExtractionAreas;
     private String pathTarkoxInstancesExtractionAreasMin;
     private String pathTarkoxInstancesExtractionAreasMax;
@@ -46,48 +45,38 @@ public class TarkoxConfigImporter {
     public TarkoxConfigImporter(Plugin plugin) {
         this.plugin = plugin;
 
-        this.pathWorldName = "world_name";
         this.pathWorldSpawn = "world_spawn";
-        this.pathGameMaxTime = "game_time";
-        this.pathCustomStrings = "strings";
-        this.pathLootsLists = "loots_lists";
         this.pathInGameStatus = "in_game_status";
         this.pathWaitingStatus = "waiting_status";
+        this.pathStrings = "strings";
+        this.pathLoots = "loots";
         
         this.pathScoreBoardTitle = "scoreboard.title";
         this.pathScoreBoardLines = "scoreboard.lines";
 
         this.pathTarkoxInstances = "games";
+        this.pathTarkoxInstancesWorldIndex = "world_index";
         this.pathTarkoxInstancesName = "name";
-        this.pathTarkoxInstancesMinPlayers = "min_players_nb";
+        this.pathTarkoxInstancesDurationTime = "duration_time";
+        this.pathTarkoxInstancesWaitTimeBeforeTp = "wait_time_before_tp";
         this.pathTarkoxInstancesMaxPlayers = "max_players_nb";
-        this.pathTarkoxInstancesWaitAreaSpawn = "wait_area_spawn";
         this.pathTarkoxInstancesExtractionAreas = "extraction_areas";
         this.pathTarkoxInstancesExtractionAreasMin = "min";
         this.pathTarkoxInstancesExtractionAreasMax = "max";
         this.pathTarkoxInstancesExtractionAreasWaitTime = "wait_time";
         this.pathTarkoxInstancesChests = "chests";
-        this.pathTarkoxInstancesSpawns = "game_spawns";
-    }
-
-    public World getWorld() {
-        String worldName = this.plugin.getConfig().getString(this.pathWorldName);
-        return this.plugin.getServer().getWorld(worldName);
+        this.pathTarkoxInstancesSpawns = "spawns";
     }
 
     public SpawnPosition getWorldSpawn() {
-        List<Integer> configSpawn = plugin.getConfig().getIntegerList(this.pathWorldSpawn);
+        List<Integer> configSpawn = this.plugin.getConfig().getIntegerList(this.pathWorldSpawn);
         
         return new SpawnPosition(
-            this.getWorld(),
-            configSpawn.get(0),
+            this.plugin.getServer().getWorlds().get(configSpawn.get(0)),
             configSpawn.get(1),
-            configSpawn.get(2)
+            configSpawn.get(2),
+            configSpawn.get(3)
         );
-    }
-
-    public Integer getGameMaxTime() {
-        return plugin.getConfig().getInt(this.pathGameMaxTime);
     }
 
     public String getInGameStatus() {
@@ -100,10 +89,10 @@ public class TarkoxConfigImporter {
 
     public HashMap<String, String> getCustomStrings() {
         HashMap<String, String> customStrings = new HashMap<String, String>();
-        Set<String> customStringKeys = plugin.getConfig().getConfigurationSection(this.pathCustomStrings).getKeys(false);
+        Set<String> customStringKeys = plugin.getConfig().getConfigurationSection(this.pathStrings).getKeys(false);
         
         for (String customStringKey : customStringKeys) {
-            String configPath = this.pathCustomStrings + "." + customStringKey;
+            String configPath = this.pathStrings + "." + customStringKey;
             String customString = plugin.getConfig().getString(configPath);
             customStrings.put(customStringKey, customString);
         }
@@ -111,45 +100,54 @@ public class TarkoxConfigImporter {
         return customStrings;
     }
 
-    public List<List<ItemStack>> getLootsLists() {
-        List<List<ItemStack>> lootsLists = new ArrayList<List<ItemStack>>();
+    public HashMap<String, List<List<ItemStack>>> getLoots() {
+        HashMap<String, List<List<ItemStack>>> loots = new HashMap<String, List<List<ItemStack>>>();
 
-        Set<String> configLootsListKeys = plugin.getConfig().getConfigurationSection(this.pathLootsLists).getKeys(false);
+        Set<String> configLootsTypes = plugin.getConfig().getConfigurationSection(this.pathLoots).getKeys(false);
 
-        for (String configLootsListKey : configLootsListKeys) {
-            List<ItemStack> lootsList = new ArrayList<ItemStack>();
+        for (String configLootsType : configLootsTypes) {
+            List<List<ItemStack>> listsitems = new ArrayList<List<ItemStack>>();
 
-            String configPath = this.pathLootsLists + "." + configLootsListKey;
-            Set<String> configLootKeys = plugin.getConfig().getConfigurationSection(configPath).getKeys(false);
+            String configPath = this.pathLoots + "." + configLootsType;
+            Set<String> configLootsKeys = plugin.getConfig().getConfigurationSection(configPath).getKeys(false);
 
-            for (String itemName : configLootKeys) {
-                String configLootPath = configPath + "." + itemName;
-                Integer itemQuantity = plugin.getConfig().getInt(configLootPath);
-            
-                if (Material.getMaterial(itemName) == null) throw new IllegalArgumentException("Invalid config file (" + configPath + ") : " + itemName + " is not a valid material name");
+            for (String configLootsKey : configLootsKeys) {
+                List<ItemStack> items = new ArrayList<ItemStack>();
 
-                Material itemMaterial = Material.getMaterial(itemName);
+                String configLootPathBis = configPath + "." + configLootsKey;
+                Set<String> configItems = plugin.getConfig().getConfigurationSection(configLootPathBis).getKeys(false);
 
-                if (itemQuantity <= 0) throw new IllegalArgumentException("Invalid config file (" + configLootPath + ") : " + itemQuantity + " is not a valid quantity");
-                
-                Integer numberFullStack = itemQuantity / 64;
-                Integer numberLeftOver = itemQuantity % 64;
+                for (String configItem : configItems) {
+                    String configLootPath = configLootPathBis + "." + configItem;
+                    Integer itemQuantity = plugin.getConfig().getInt(configLootPath);
 
-                for (int i = 0; i < numberFullStack; i++) {
-                    ItemStack itemStack = new ItemStack(itemMaterial, 64);
-                    lootsList.add(itemStack);
+                    if (Material.getMaterial(configItem) == null) throw new IllegalArgumentException("Invalid config file (" + configPath + ") : " + configItem + " is not a valid material name");
+    
+                    Material itemMaterial = Material.getMaterial(configItem);
+
+                    if (itemQuantity <= 0) throw new IllegalArgumentException("Invalid config file (" + configLootPath + ") : " + itemQuantity + " is not a valid quantity");
+                    
+                    Integer numberFullStack = itemQuantity / 64;
+                    Integer numberLeftOver = itemQuantity % 64;
+
+                    for (int i = 0; i < numberFullStack; i++) {
+                        ItemStack itemStack = new ItemStack(itemMaterial, 64);
+                        items.add(itemStack);
+                    }
+                    
+                    if (numberLeftOver > 0) {
+                        ItemStack itemStack = new ItemStack(itemMaterial, numberLeftOver);
+                        items.add(itemStack);
+                    }
                 }
-                
-                if (numberLeftOver > 0) {
-                    ItemStack itemStack = new ItemStack(itemMaterial, numberLeftOver);
-                    lootsList.add(itemStack);
-                }
+
+                listsitems.add(items);
             }
 
-            lootsLists.add(lootsList);
+            loots.put(configLootsType, listsitems);            
         }
 
-        return lootsLists;
+        return loots;
     }
 
     public String getScoreBoardTitle() {
@@ -162,17 +160,21 @@ public class TarkoxConfigImporter {
 
     public List<TarkoxInstance> getTarkoxInstances() {
         List<TarkoxInstance> instances = new ArrayList<TarkoxInstance>();
-        World world = this.getWorld();
+        HashMap<String, List<List<ItemStack>>> loots = this.getLoots();
 
         Set<String> configInstancesKeys = plugin.getConfig().getConfigurationSection(this.pathTarkoxInstances).getKeys(false);
 
         for (String configInstancesKey : configInstancesKeys) {
             String configPath = this.pathTarkoxInstances + "." + configInstancesKey;
 
+            Integer worldIndex = plugin.getConfig().getInt(configPath + "." + this.pathTarkoxInstancesWorldIndex);
+            World world = this.plugin.getServer().getWorlds().get(worldIndex);
+
             String namePath = configPath + "." + this.pathTarkoxInstancesName;
             String name = plugin.getConfig().getString(namePath);
             name = name.toLowerCase();
             name = name.replace(" ", "_");
+            
             if (name == null) throw new IllegalArgumentException("Invalid config file (" + namePath + ") : " + name + " is not a valid name");
             if (name.equals("")) throw new IllegalArgumentException("Invalid config file (" + namePath + ") : " + name + " is not a valid name");
             if (name.equals("this")) throw new IllegalArgumentException("Invalid config file (" + namePath + ") : 'this' (reserved keyword)");
@@ -180,17 +182,11 @@ public class TarkoxConfigImporter {
             for (TarkoxInstance tarkoxInstance : instances) {
                 if (tarkoxInstance.getName().equalsIgnoreCase(name)) throw new IllegalArgumentException("Invalid config file (" + namePath + ") : " + name + " is already used");
             }
+
+            Integer durationTime = plugin.getConfig().getInt(configPath + "." + this.pathTarkoxInstancesDurationTime);
+            Integer waitTimeBeforeTp = plugin.getConfig().getInt(configPath + "." + this.pathTarkoxInstancesWaitTimeBeforeTp);
             
-            Integer minPlayers = plugin.getConfig().getInt(configPath + "." + this.pathTarkoxInstancesMinPlayers);
             Integer maxPlayers = plugin.getConfig().getInt(configPath + "." + this.pathTarkoxInstancesMaxPlayers);
-            
-            List<Integer> configWaitAreaSpawn = plugin.getConfig().getIntegerList(configPath + "." + this.pathTarkoxInstancesWaitAreaSpawn);
-            SpawnPosition waitAreaSpawn = new SpawnPosition(
-                world,
-                configWaitAreaSpawn.get(0),
-                configWaitAreaSpawn.get(1),
-                configWaitAreaSpawn.get(2)
-            );
 
             String extractionAreasPath = configPath + "." + this.pathTarkoxInstancesExtractionAreas;
             Set<String> configExtractionAreasKeys = plugin.getConfig().getConfigurationSection(extractionAreasPath).getKeys(false);
@@ -223,25 +219,36 @@ public class TarkoxConfigImporter {
                 extractionAreas.add(extractionArea);
             }
 
-            String chestsPath = configPath + "." + this.pathTarkoxInstancesChests;
-            Set<String> configChestsKeys = plugin.getConfig().getConfigurationSection(chestsPath).getKeys(false);
-            List<Chest> chests = new ArrayList<Chest>();
+            HashMap<String, List<Chest>> chests = new HashMap<String, List<Chest>>();
+            String configCestsTypesPath = configPath + "." + this.pathTarkoxInstancesChests;
+            Set<String> configChestsTypes = plugin.getConfig().getConfigurationSection(configCestsTypesPath).getKeys(false);
 
-            for (String configChestKey : configChestsKeys) {
-                String configChestPath = chestsPath + "." + configChestKey;
-                List<Integer> configChest = plugin.getConfig().getIntegerList(configChestPath);
+            for (String configChestsType : configChestsTypes) {
+                if (!loots.containsKey(configChestsType)) throw new IllegalArgumentException("Invalid config file (" + configCestsTypesPath + ") : " + configChestsType + " is not a valid loot type");
 
-                BlockState block = world.getBlockAt(
-                    configChest.get(0),
-                    configChest.get(1),
-                    configChest.get(2)
-                ).getState();
+                List<Chest> chestsList = new ArrayList<Chest>();
 
-                if (!(block instanceof Chest)) throw new IllegalArgumentException("Invalid config file (" + configChestPath + ") : " + configChest.get(0) + ", " + configChest.get(1) + ", " + configChest.get(2) + " is not a chest");
+                String configChestsPath = configCestsTypesPath + "." + configChestsType;
+                Set<String> configChests = plugin.getConfig().getConfigurationSection(configChestsPath).getKeys(false);
+                
+                for (String configChest : configChests) {
+                    String configChestPath = configChestsPath + "." + configChest;
+                    List<Integer> configChestLocation = plugin.getConfig().getIntegerList(configChestPath);
 
-                Chest chest = (Chest) block;
+                    BlockState block = world.getBlockAt(
+                        configChestLocation.get(0),
+                        configChestLocation.get(1),
+                        configChestLocation.get(2)
+                    ).getState();
 
-                chests.add(chest);
+                    if (!(block instanceof Chest)) throw new IllegalArgumentException("Invalid config file (" + configChestPath + ") : " + configChestLocation.get(0) + ", " + configChestLocation.get(1) + ", " + configChestLocation.get(2) + " is not a chest");
+
+                    Chest chest = (Chest) block;
+
+                    chestsList.add(chest);
+                }
+
+                chests.put(configChestsType, chestsList);
             }
 
             String spawnsPath = configPath + "." + this.pathTarkoxInstancesSpawns;
@@ -264,9 +271,9 @@ public class TarkoxConfigImporter {
             TarkoxInstance instance = new TarkoxInstance(
                 plugin,
                 name,
-                minPlayers,
+                durationTime,
+                waitTimeBeforeTp,
                 maxPlayers,
-                waitAreaSpawn,
                 extractionAreas,
                 chests,
                 spawns

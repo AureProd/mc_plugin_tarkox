@@ -9,9 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import fr.aureprod.tarkox.Plugin;
-import fr.aureprod.tarkox.exception.TarkoxInstanceDoesNotExistException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
-import fr.aureprod.tarkox.instance.TarkoxInstance;
 
 public class TarkoxAdminTabCompleter extends TarkoxAdminController implements TabCompleter {
     public TarkoxAdminTabCompleter(Plugin plugin) {
@@ -29,17 +27,13 @@ public class TarkoxAdminTabCompleter extends TarkoxAdminController implements Ta
         List<String> results = new ArrayList<String>();
 
         if (args.length == 1) {
-            preTraited.add(this.getKickSubCommand());
             preTraited.add(this.getStatusSubCommand());
-            preTraited.add(this.getStartSubCommand());
             preTraited.add(this.getStopSubCommand());
         } 
         else if (args.length == 2) {
             String subCommand = args[0];
             if (
-                subCommand.equalsIgnoreCase(this.getKickSubCommand()) ||
                 subCommand.equalsIgnoreCase(this.getStatusSubCommand()) ||
-                subCommand.equalsIgnoreCase(this.getStartSubCommand()) ||
                 subCommand.equalsIgnoreCase(this.getStopSubCommand())
             ) {
                 List<String> tarkoxInstancesNames = this.plugin.instanceController.getNamesTarkoxInstances();
@@ -53,22 +47,6 @@ public class TarkoxAdminTabCompleter extends TarkoxAdminController implements Ta
                 for (String tarkoxInstanceName : tarkoxInstancesNames) {
                     preTraited.add(tarkoxInstanceName);
                 }
-            } 
-        }
-        else if (args.length == 3) {
-            String subCommand = args[0];
-            if (subCommand.equalsIgnoreCase(this.getKickSubCommand())) {
-                String tarkoxInstanceName = args[1];
-                
-                try {
-                    TarkoxInstance tarkoxInstance = this.plugin.instanceController.getTarkoxInstanceByName(tarkoxInstanceName);
-                
-                    List<Player> tarkoxInstancePlayers = tarkoxInstance.getInGamePlayers();
-
-                    for (Player tarkoxInstancePlayer : tarkoxInstancePlayers) {
-                        preTraited.add(tarkoxInstancePlayer.getName());
-                    }
-                } catch (TarkoxInstanceDoesNotExistException e) {}
             } 
         }
         

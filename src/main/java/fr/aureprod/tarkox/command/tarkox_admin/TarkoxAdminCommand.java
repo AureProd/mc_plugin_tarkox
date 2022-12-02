@@ -6,9 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import fr.aureprod.tarkox.Plugin;
-import fr.aureprod.tarkox.exception.TarkoxInstanceAlreadyStartedException;
 import fr.aureprod.tarkox.exception.TarkoxInstanceDoesNotExistException;
-import fr.aureprod.tarkox.exception.TarkoxInstanceEnoughPlayersForStartException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
 import fr.aureprod.tarkox.exception.TarkoxSenderIsNotPlayerException;
 import fr.aureprod.tarkox.instance.TarkoxInstance;
@@ -26,19 +24,7 @@ public class TarkoxAdminCommand extends TarkoxAdminController implements Command
             String subCommand = args[0];
 
             try {
-                if (subCommand.equalsIgnoreCase("kick")) {
-                    if (args.length == 3) {
-                        String mapName = args[1];
-                        String playerName = args[2];
-                        Player kickedPlayer = this.plugin.getServer().getPlayer(playerName);
-    
-                        this.kickAction(sender, mapName, kickedPlayer);
-    
-                        return true;
-                    }
-                    else this.sendKickSubCommandTemplate(sender);
-                }
-                else if (subCommand.equalsIgnoreCase("status")) {
+                if (subCommand.equalsIgnoreCase("status")) {
                     if (args.length == 2) {
                         String mapName = args[1];
     
@@ -47,16 +33,6 @@ public class TarkoxAdminCommand extends TarkoxAdminController implements Command
                         return true;
                     }
                     else this.sendStatusSubCommandTemplate(sender);
-                }
-                else if (subCommand.equalsIgnoreCase("start")) {
-                    if (args.length == 2) {
-                        String mapName = args[1];
-    
-                        this.startAction(sender, mapName);
-
-                        return true;
-                    }
-                    else this.sendStartSubCommandTemplate(sender);
                 }
                 else if (subCommand.equalsIgnoreCase("stop")) {
                     if (args.length == 2) {
@@ -71,19 +47,20 @@ public class TarkoxAdminCommand extends TarkoxAdminController implements Command
                 else this.sendTarkoxAdminCommandTemplate(sender);
             } 
             catch (TarkoxSenderIsNotPlayerException e) {
-                // TODO: faire exceptions avec des messages du config
+                sender.sendMessage(this.plugin.configController.getString("error_command_sender_is_not_player"));
             } 
             catch (TarkoxInstanceDoesNotExistException e) {
-                // TODO: faire exceptions avec des messages du config
+                sender.sendMessage(this.plugin.configController.getString("error_game_does_not_exist"));
             } 
             catch (TarkoxPlayerNotInInstanceException e) {
-                // TODO: faire exceptions avec des messages du config
-            }
-            catch (TarkoxInstanceAlreadyStartedException e) {
-                // TODO: faire exceptions avec des messages du config
-            } 
-            catch (TarkoxInstanceEnoughPlayersForStartException e) {
-                // TODO: faire exceptions avec des messages du config
+                String message = this.plugin.configController.getString("error_player_not_in_game", e.getPlayer());
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+                    
+                    if (e.isPlayer(player)) message = this.plugin.configController.getString("error_you_are_not_in_game");
+                }
+
+                sender.sendMessage(message);
             }
         } 
         else this.sendTarkoxAdminCommandTemplate(sender);
@@ -91,28 +68,16 @@ public class TarkoxAdminCommand extends TarkoxAdminController implements Command
         return false;
     }
 
-    private void kickAction(CommandSender sender, String mapName, Player kickedPlayer) throws TarkoxInstanceDoesNotExistException, TarkoxPlayerNotInInstanceException, TarkoxSenderIsNotPlayerException {
-        TarkoxInstance tarkoxInstance = this.getTarkoxInstanceBySenderAndName(sender, mapName);
-    
-        tarkoxInstance.kickPlayer(kickedPlayer);
-
-        sender.sendMessage("§a The player '" + kickedPlayer.getName() + "' has been kicked from the map '" + mapName + "'."); // TODO: message dans le config
-    }
-
     private void statusAction(CommandSender sender, String mapName) throws TarkoxInstanceDoesNotExistException, TarkoxPlayerNotInInstanceException, TarkoxSenderIsNotPlayerException {
         TarkoxInstance tarkoxInstance = this.getTarkoxInstanceBySenderAndName(sender, mapName);
     
-        sender.sendMessage("§aMap: '" + tarkoxInstance.getName() + "'");
-        sender.sendMessage("§aPlayers: " + tarkoxInstance.getInGamePlayersCount().toString());
-        sender.sendMessage("§aStatus: " + tarkoxInstance.getStatus());
-    }
-
-    private void startAction(CommandSender sender, String mapName) throws TarkoxInstanceDoesNotExistException, TarkoxPlayerNotInInstanceException, TarkoxSenderIsNotPlayerException, TarkoxInstanceAlreadyStartedException, TarkoxInstanceEnoughPlayersForStartException {
-        TarkoxInstance tarkoxInstance = this.getTarkoxInstanceBySenderAndName(sender, mapName);
-    
-        tarkoxInstance.startInstance();
-
-        sender.sendMessage("§aThe map '" + mapName + "' has been started."); // TODO: message dans le config
+        String stringMap = this.plugin.configController.getString("status_map_name", "MAP", tarkoxInstance.getName());
+        String stringPlayers = this.plugin.configController.getString("status_players_count", "PLAYERS", tarkoxInstance.getInGamePlayersCount());
+        String stringStatus = this.plugin.configController.getString("status_map_status", "STATUS", tarkoxInstance.getStatus());
+        
+        sender.sendMessage(stringMap);
+        sender.sendMessage(stringPlayers);
+        sender.sendMessage(stringStatus);
     }
 
     private void stopAction(CommandSender sender, String mapName) throws TarkoxInstanceDoesNotExistException, TarkoxPlayerNotInInstanceException, TarkoxSenderIsNotPlayerException {
@@ -120,6 +85,7 @@ public class TarkoxAdminCommand extends TarkoxAdminController implements Command
     
         tarkoxInstance.stopInstance();
 
-        sender.sendMessage("§a The map '" + mapName + "' has been stopped."); // TODO: message dans le config
+        String string = this.plugin.configController.getString("map_has_stopped", "MAP", tarkoxInstance.getName());
+        sender.sendMessage(string);
     }
 }

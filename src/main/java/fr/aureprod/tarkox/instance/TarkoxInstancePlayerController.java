@@ -1,6 +1,7 @@
 package fr.aureprod.tarkox.instance;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.block.Chest;
@@ -13,7 +14,6 @@ import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
 
 public class TarkoxInstancePlayerController extends TarkoxInstanceParent {
     private List<TarkoxInstancePlayer> playersInGame;
-    private List<Player> playersKicks;
     private List<Player> playersQuit;
     private List<Player> playersExtracted;
     private List<Player> playersDead;
@@ -21,18 +21,17 @@ public class TarkoxInstancePlayerController extends TarkoxInstanceParent {
     public TarkoxInstancePlayerController(
         Plugin plugin, 
         String name, 
-        Integer minPlayers, 
+        Integer durationTime,
+        Integer waitTimeBeforeTp,
         Integer maxPlayers,
-        SpawnPosition waitAreaSpawn, 
         List<ExtractionArea> extractionAreas, 
-        List<Chest> chests,
+        HashMap<String, List<Chest>> chests,
         List<SpawnPosition> spawns
     ) {
-        super(plugin, name, minPlayers, maxPlayers, waitAreaSpawn, extractionAreas, chests, spawns);
+        super(plugin, name, durationTime, waitTimeBeforeTp, maxPlayers, extractionAreas, chests, spawns);
         
         this.playersInGame = new ArrayList<TarkoxInstancePlayer>();  
         this.playersQuit = new ArrayList<Player>();
-        this.playersKicks = new ArrayList<Player>();
         this.playersExtracted = new ArrayList<Player>();
         this.playersDead = new ArrayList<Player>();
     }
@@ -73,22 +72,6 @@ public class TarkoxInstancePlayerController extends TarkoxInstanceParent {
 
     protected void clearPlayersQuit() {
         this.playersQuit.clear();
-    }
-
-    protected void addPlayerKick(Player player) {
-        this.playersKicks.add(player);
-    }
-
-    protected void removePlayerKick(Player player) {
-        this.playersKicks.remove(player);
-    }
-
-    protected Boolean isPlayerKick(Player player) {
-        return this.playersKicks.contains(player);
-    }
-
-    protected void clearPlayersKicks() {
-        this.playersKicks.clear();
     }
 
     protected void addPlayerExtracted(Player player) {

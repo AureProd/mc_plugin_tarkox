@@ -29,9 +29,23 @@ public class Area {
 
     public Boolean isInZone(Position location) {
         if (!location.getWorld().equals(this.min.getWorld())) return false;
-        if ((location.getX() < this.min.getX()) || (location.getX() > this.max.getX())) return false;
-        if ((location.getY() < this.min.getY()) || (location.getY() > this.max.getY())) return false;
-        if ((location.getZ() < this.min.getZ()) || (location.getZ() > this.max.getZ())) return false;
+
+        Position locationMin = new Position(
+            this.min.getWorld(),
+            Math.min(this.min.getX(), this.max.getX()),
+            Math.min(this.min.getY(), this.max.getY()),
+            Math.min(this.min.getZ(), this.max.getZ())
+        );
+        Position locationMax = new Position(
+            this.min.getWorld(),
+            Math.max(this.min.getX(), this.max.getX()),
+            Math.max(this.min.getY(), this.max.getY()),
+            Math.max(this.min.getZ(), this.max.getZ())
+        );
+
+        if ((location.getX() < locationMin.getX()) || (location.getX() > locationMax.getX())) return false;
+        if ((location.getY() < locationMin.getY()) || (location.getY() > locationMax.getY())) return false;
+        if ((location.getZ() < locationMin.getZ()) || (location.getZ() > locationMax.getZ())) return false;
 
         return true;
     }

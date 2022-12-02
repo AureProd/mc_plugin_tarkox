@@ -2,8 +2,8 @@ package fr.aureprod.tarkox;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-import fr.aureprod.tarkox.command.tarkox.TarkoxCommand;
-import fr.aureprod.tarkox.command.tarkox.TarkoxTabCompleter;
+import fr.aureprod.tarkox.command.raid.RaidCommand;
+import fr.aureprod.tarkox.command.raid.RaidTabCompleter;
 import fr.aureprod.tarkox.command.tarkox_admin.TarkoxAdminCommand;
 import fr.aureprod.tarkox.command.tarkox_admin.TarkoxAdminTabCompleter;
 import fr.aureprod.tarkox.config.TarkoxConfigController;
@@ -20,7 +20,7 @@ public class Plugin extends JavaPlugin {
   @Override
   public void onEnable()
   {
-    System.out.println("[tarkox] Tarkox plugin enabled");
+    System.out.println("[Tarkox] Tarkox plugin enabled");
 
     this.saveDefaultConfig();
 
@@ -31,8 +31,8 @@ public class Plugin extends JavaPlugin {
     this.getServer().getPluginManager().registerEvents(new TarkoxListener(this), this);
 
     // register commands
-    this.getCommand("tarkox").setExecutor(new TarkoxCommand(this));
-    this.getCommand("tarkox").setTabCompleter(new TarkoxTabCompleter(this));
+    this.getCommand("raid").setExecutor(new RaidCommand(this));
+    this.getCommand("raid").setTabCompleter(new RaidTabCompleter(this));
     this.getCommand("tarkox-admin").setExecutor(new TarkoxAdminCommand(this));
     this.getCommand("tarkox-admin").setTabCompleter(new TarkoxAdminTabCompleter(this)); 
   }
@@ -40,6 +40,6 @@ public class Plugin extends JavaPlugin {
   @Override
   public void onDisable()
   {
-    System.out.println("[tarkox] Tarkox plugin disabled");
+    System.out.println("[Tarkox] Tarkox plugin disabled");
   }
 }

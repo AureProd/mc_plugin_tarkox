@@ -15,12 +15,15 @@ public class TarkoxInstancePlayer {
     private ExtractionArea extractionArea;
     private List<Player> killedPlayers;
     private ScoreBoardController scoreBoardController;
+    private int waitBeforeTpTaskRunnerId;
+    private TarkoxInstanceStatus status;
 
     public TarkoxInstancePlayer(Plugin plugin, TarkoxInstance tarkoxInstance, Player player) {
         this.player = player;
 
         this.timeInExctractionArea = 0;
         this.extractionArea = null;
+        this.status = TarkoxInstanceStatus.WAITING;
 
         this.killedPlayers = new ArrayList<Player>();
         this.scoreBoardController = new ScoreBoardController(plugin, tarkoxInstance, this);
@@ -73,5 +76,25 @@ public class TarkoxInstancePlayer {
 
     public void removeScoreBoard() {
         this.player.setScoreboard(this.scoreBoardController.getEmptyScoreboard());
+    }
+
+    public Boolean isInGame() {
+        return this.status == TarkoxInstanceStatus.INGAME;
+    }
+
+    public Boolean isWaiting() {
+        return this.status == TarkoxInstanceStatus.WAITING;
+    }
+
+    public void setInGame() {
+        this.status = TarkoxInstanceStatus.INGAME;
+    }
+
+    public int getWaitBeforeTpTaskRunnerId() {
+        return this.waitBeforeTpTaskRunnerId;
+    }
+
+    public void setWaitBeforeTpTaskRunnerId(int waitBeforeTpTaskRunnerId) {
+        this.waitBeforeTpTaskRunnerId = waitBeforeTpTaskRunnerId;
     }
 }

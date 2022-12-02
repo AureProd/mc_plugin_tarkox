@@ -1,4 +1,4 @@
-package fr.aureprod.tarkox.command.tarkox;
+package fr.aureprod.tarkox.command.raid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,15 +10,15 @@ import org.bukkit.entity.Player;
 
 import fr.aureprod.tarkox.Plugin;
 
-public class TarkoxTabCompleter extends TarkoxController implements TabCompleter {
-    public TarkoxTabCompleter(Plugin plugin) {
+public class RaidTabCompleter extends RaidController implements TabCompleter {
+    public RaidTabCompleter(Plugin plugin) {
         super(plugin);
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player)) return null;
-        if (!command.getName().equalsIgnoreCase("tarkox")) return null;
+        if (!command.getName().equalsIgnoreCase("raid")) return null;
 
         List<String> preTraited = new ArrayList<String>();
         List<String> results = new ArrayList<String>();

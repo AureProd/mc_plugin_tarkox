@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.aureprod.tarkox.Plugin;
+import fr.aureprod.tarkox.exception.TarkoxInstanceNotStartedException;
 import fr.aureprod.tarkox.exception.TarkoxPlayerNotInInstanceException;
 import fr.aureprod.tarkox.instance.TarkoxInstance;
 import fr.aureprod.tarkox.instance.TarkoxInstancePlayer;
@@ -38,7 +39,7 @@ public class TarkoxListener implements Listener {
 
             tarkoxInstance.killedPlayer(player);
         } 
-        catch (TarkoxPlayerNotInInstanceException e) {}
+        catch (TarkoxPlayerNotInInstanceException | TarkoxInstanceNotStartedException e) {}
     }
 
     @EventHandler
@@ -79,14 +80,18 @@ public class TarkoxListener implements Listener {
             TarkoxInstance tarkoxInstance = this.plugin.instanceController.getTarkoxInstanceByPlayer(player);
 
             if (!tarkoxInstance.isInGame()) return;
-
             TarkoxInstancePlayer tarkoxInstancePlayer = this.plugin.instanceController.getTarkoxInstancePlayerByPlayer(player);
 
-            if (!tarkoxInstancePlayer.hasExtractionArea()) return;
+            if (tarkoxInstancePlayer.hasExtractionArea()) return;
             if (!tarkoxInstance.isInExtractionArea(player)) return;
-
+            
             tarkoxInstance.startExtractPlayer(player);
         }
-        catch (TarkoxPlayerNotInInstanceException e) {}
+        catch (TarkoxPlayerNotInInstanceException e) {
+            e.printStackTrace();
+        } 
+        catch (TarkoxInstanceNotStartedException e) {
+            e.printStackTrace();
+        }
     }
 }
