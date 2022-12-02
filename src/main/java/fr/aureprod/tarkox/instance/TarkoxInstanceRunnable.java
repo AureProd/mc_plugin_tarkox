@@ -30,7 +30,7 @@ public class TarkoxInstanceRunnable implements Runnable {
                         Player player = tarkoxInstancePlayer.getPlayer();
 
                         if (tarkoxInstancePlayer.hasExtractionArea() && tarkoxInstancePlayer.getExtractionArea().isInZone(player)) {
-                            if (tarkoxInstancePlayer.getExtractionArea().getWaitTime() < tarkoxInstancePlayer.getTimeInExctractionArea()) {
+                            if (tarkoxInstancePlayer.getExtractionArea().getWaitTime() <= tarkoxInstancePlayer.getTimeInExctractionArea()) {
                                 try {
                                     instance.extactPlayer(player);
                                 } 
@@ -39,7 +39,7 @@ public class TarkoxInstanceRunnable implements Runnable {
                             else {
                                 tarkoxInstancePlayer.incrementTimeInExctractionArea();
 
-                                Integer timeLeft = tarkoxInstancePlayer.getExtractionArea().getWaitTime() - tarkoxInstancePlayer.getTimeInExctractionArea();
+                                Integer timeLeft = (tarkoxInstancePlayer.getExtractionArea().getWaitTime() - tarkoxInstancePlayer.getTimeInExctractionArea()) + 1;
                                 String string = this.instance.plugin.configController.getString("you_time_before_extraction", "TIMER", timeLeft);
                                 player.sendMessage(string);
                             }
